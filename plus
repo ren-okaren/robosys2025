@@ -1,0 +1,17 @@
+#!/usr/bin/python3
+# SPDX-FileCopyrightText: 2025 Ren Okaren
+# SPDX-License-Identifier: MIT
+
+import sys
+
+total = 0
+for ln in sys.stdin:
+    ln = ln.strip()
+    try:
+        n = int(ln)
+    except ValueError:
+        n = float(ln)
+    total += n
+
+print(total)
+
