@@ -12,3 +12,4 @@ jobs:
 
       - name: run all tests
         run: bash -xv ./test.bash
+
