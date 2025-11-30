@@ -93,7 +93,7 @@ def main():
 
         # メニューに存在するかチェック
         if name not in MENU:
-            print(f"メニューにない商品です: {name}", file=sys.stderr) #エラー出力にするとテストのとき便利だそう
+            print(f"メニューにない商品です: {name}", file=sys.stderr) #エラー出力にするとテストのとき便利
             sys.exit(1)
 
         unit_price = MENU[name]
@@ -107,7 +107,7 @@ def main():
     # 何か1つでも注文があった場合だけ合計を表示
     if has_any_order == True:
         print(f"合計金額は {total_price} 円になります")
-#このファイルが直接実行された時だけ、mainを呼び出す。（importした瞬間main()が動き出すのを防げるそう）
+#このファイルが直接実行された時だけ、mainを呼び出す。（importした瞬間main()が動き出すのを防げる）
 if __name__ == "__main__":
     main()
 
