@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 import sys
-#メニュー表
+
+# メニュー表
 MENU = {
     "ビッグマック": 480,
     "ダブルチーズバーガー": 450,
@@ -49,65 +50,72 @@ MENU = {
     "キャラメルラテ": 270,
     "アイスキャラメルラテ": 270,
 }
-#起動時にメニューを表示する関数
+
+# 起動時にメニューを表示する関数（今回は出力をシンプルにしたいので main() からは呼ばない）
 def print_menu_list():
     print("メニュー一覧")
-#辞書の（メニュー、値段）をそれぞれここで受け取る
     for name, price in MENU.items():
         print(f"{name} {price}円")
     print("数量を指定する場合は「2サイドサラダ」や「2 サイドサラダ」のように入力してください")
     print("入力が終わったら Ctrl+D を押すと合計金額が表示されます")
     print("")
 
+
 def main():
     total_price = 0
     has_any_order = False
-    # 起動時に一回メニューを表示
-    print_menu_list()
+
+    # 起動時に一回メニューを表示（課題の趣旨に合わせて今回は使わない）
+    # print_menu_list()
 
     # 標準入力から1行ずつ注文を読む
     for order_line in sys.stdin:
-        raw = order_line.strip()
-        if not raw:
-            # 空行は無視
-            continue
-        # 行頭の連続した数字を個数として読む
-        quantity = 1   #仮に入力がなければ1個
-        name = raw
-        i = 0
-        #rawが一文字ずつ数字かどうか調べる
-        while i < len(raw) and raw[i].isdigit():
-            i += 1
-        if i > 0:
-            quantity_str = raw[:i] #数量部分の文字列
-            name = raw[i:].strip() #商品名部分の文字列
+        # 1行の中をカンマで区切って順番に処理する
+        for chunk in order_line.split(","):
+            raw = chunk.strip()
+            if not raw:
+                # 空行や空の要素は無視
+                continue
 
-            if not name:
-                print("商品名を指定してください。", file=sys.stderr)
-                sys.exit(1) #エラーで終了
-            quantity = int(quantity_str)
+            # 行頭の連続した数字を個数として読む
+            quantity = 1   # 行に数量の入力がなければ1個
+            name = raw
+            i = 0
+            # raw が一文字ずつ数字かどうか調べる
+            while i < len(raw) and raw[i].isdigit():
+                i += 1
 
-            if quantity <= 0:
-                print("個数は1以上の整数で指定してください。", file=sys.stderr)
+            if i > 0:
+                quantity_str = raw[:i]       # 数量部分の文字列
+                name = raw[i:].strip()       # 商品名部分の文字列
+
+                if not name:
+                    print("商品名を指定してください。", file=sys.stderr)
+                    sys.exit(1)
+                quantity = int(quantity_str)
+                if quantity <= 0:
+                    print("個数は1以上の整数で指定してください。", file=sys.stderr)
+                    sys.exit(1)
+
+            # メニューに存在するかチェック
+            if name not in MENU:
+                print(f"メニューにない商品です: {name}", file=sys.stderr)  # エラー出力にするとテストのとき便利
                 sys.exit(1)
 
-        # メニューに存在するかチェック
-        if name not in MENU:
-            print(f"メニューにない商品です: {name}", file=sys.stderr) #エラー出力にするとテストのとき便利
-            sys.exit(1)
+            unit_price = MENU[name]
+            line_total = unit_price * quantity  # 値段×個数
 
-        unit_price = MENU[name]
+            # 各行の結果を表示（課題では合計だけ出せば良い
+            # print(f"{name} {quantity}個 {line_total}円")
 
-        line_total = unit_price * quantity #値段×個数
+            total_price += line_total
+            has_any_order = True
 
-        # 各行の結果を表示
-        print(f"{name} {quantity}個 {line_total}円")
-        total_price += line_total
-        has_any_order = True
-    # 何か1つでも注文があった場合だけ合計を表示
-    if has_any_order == True:
-        print(f"合計金額は {total_price} 円になります")
-#このファイルが直接実行された時だけ、mainを呼び出す。（importした瞬間main()が動き出すのを防げる）
+    # 何か1つでも注文があった場合だけ合計を表示（数値だけを出力）
+    if has_any_order:
+        print(total_price)
+
+
+# このファイルが直接実行された時だけ、main を呼び出す。（import した瞬間 main() が動き出すのを防げる）
 if __name__ == "__main__":
     main()
-
