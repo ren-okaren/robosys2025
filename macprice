@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 Ren Okaren
-# SPDX-License-Identifier:
-import sys
+# SPDX-License-Identifier: MIT
 
+import sys
+#メニュー表
 MENU = {
     "ビッグマック": 480,
     "ダブルチーズバーガー": 450,
@@ -18,27 +19,27 @@ MENU = {
     "エグチ(エッグチーズバーガー)": 250,
     "ハンバーガー": 190,
     "チーズバーガー": 220,
-    "チキンマックナゲット 5ピース": 290,
+    "チキンマックナゲット5ピース": 290,
     "マックフライポテト": 200,
     "サイドサラダ": 350,
     "えだまめコーン": 300,
     "シャカチキ": 220,
     "コカ・コーラ": 140,
-    "コカ・コーラ ゼロ": 140,
+    "コカ・コーラゼロ": 140,
     "スプライト": 140,
-    "ファンタ グレープ": 140,
-    "ファンタ メロン": 140,
+    "ファンタグレープ": 140,
+    "ファンタメロン": 140,
     "爽健美茶": 140,
-    "Qoo 白ぶどう": 140,
-    "アールグレイ アイスティー(ストレート)": 140,
-    "アールグレイ アイスティー(レモン)": 140,
-    "アールグレイ アイスティー(ミルク)": 140,
+    "Qoo白ぶどう": 140,
+    "アールグレイアイスティー(ストレート)": 140,
+    "アールグレイアイスティー(レモン)": 140,
+    "アールグレイアイスティー(ミルク)": 140,
     "ホットティー(ストレート)": 140,
     "ホットティー(レモン)": 140,
     "ホットティー(ミルク)": 140,
     "野菜生活100": 190,
-    "ミニッツメイド オレンジ(S)": 240,
-    "ミニッツメイド アップル100": 180,
+    "ミニッツメイドオレンジ(S)": 240,
+    "ミニッツメイドアップル100": 180,
     "ミルク": 270,
     "サントリー黒烏龍茶#濃いめ": 320,
     "プレミアムローストコーヒー": 120,
@@ -48,27 +49,65 @@ MENU = {
     "キャラメルラテ": 270,
     "アイスキャラメルラテ": 270,
 }
+#起動時にメニューを表示する関数
+def print_menu_list():
+    print("メニュー一覧")
+#辞書の（メニュー、値段）をそれぞれここで受け取る
+    for name, price in MENU.items():
+        print(f"{name} {price}円")
+    print("数量を指定する場合は「2サイドサラダ」や「2 サイドサラダ」のように入力してください")
+    print("入力が終わったら Ctrl+D を押すと合計金額が表示されます")
+    print("")
 
 def main():
-    total = 0
-    any_item = False
+    total_price = 0
+    has_any_order = False
+    # 起動時に一回メニューを表示
+    print_menu_list()
 
-    for line in sys.stdin:
-        name = line.strip()
-        if not name:
+    # 標準入力から1行ずつ注文を読む
+    for order_line in sys.stdin:
+        raw = order_line.strip()
+        if not raw:
+            # 空行は無視
             continue
+        # 行頭の連続した数字を個数として読む
+        quantity = 1   #仮に入力がなければ1個
+        name = raw
+        i = 0
+        #rawが一文字ずつ数字かどうか調べる
+        while i < len(raw) and raw[i].isdigit():
+            i += 1
+        if i > 0:
+            quantity_str = raw[:i] #数量部分の文字列
+            name = raw[i:].strip() #商品名部分の文字列
 
+            if not name:
+                print("商品名を指定してください。", file=sys.stderr)
+                sys.exit(1) #エラーで終了
+            quantity = int(quantity_str)
+
+            if quantity <= 0:
+                print("個数は1以上の整数で指定してください。", file=sys.stderr)
+                sys.exit(1)
+
+        # メニューに存在するかチェック
         if name not in MENU:
-            print(f"メニューにない商品です: {name}", file=sys.stderr)
+            print(f"メニューにない商品です: {name}", file=sys.stderr) #エラー出力にするとテストのとき便利だそう
             sys.exit(1)
 
-        price = MENU[name]
-        print(f"{name} {price}")
-        total += price
-        any_item = True
+        unit_price = MENU[name]
 
-    if any_item:
-        print(f"合計 {total}")
+        line_total = unit_price * quantity #値段×個数
 
+        # 各行の結果を表示
+        print(f"{name} {quantity}個 {line_total}円")
+        total_price += line_total
+        has_any_order = True
+    # 何か1つでも注文があった場合だけ合計を表示
+    if has_any_order == True:
+        print(f"合計金額は {total_price} 円になります")
+#このファイルが直接実行された時だけ、mainを呼び出す。（importした瞬間main()が動き出すのを防げるそう）
 if __name__ == "__main__":
     main()
+
