@@ -1,4 +1,4 @@
-kk#!/bin/bash -xv
+#!/bin/bash -xv
 # SPDX-FileCopyrightText: 2025 Ren Okazaki
 # SPDX-License-Identifier: BSD-3-Clause
 
