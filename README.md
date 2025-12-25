@@ -32,6 +32,7 @@ $ chmod +x plus macprice test.bash
 
 ### 実行例
 
+```bash
 $ seq 5 | ./plus
 15
 
@@ -59,6 +60,7 @@ $ seq 5 | ./plus
 
 ### 実行例
 
+```bash
 $ printf "カレーライス,サラダ,ブラックコーヒー\n" | ./macprice
 975
 
