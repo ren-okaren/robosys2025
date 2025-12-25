@@ -35,7 +35,7 @@ $ chmod +x plus macprice test.bash
 ```bash
 $ seq 5 | ./plus
 15
-
+```
 ## macprice コマンド（kcal計算）
 
 カンマ区切りの料理名を標準入力から1行で受け取り、推定カロリー（kcal）の合計を標準出力に出力します。
