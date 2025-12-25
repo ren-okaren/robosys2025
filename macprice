@@ -2,120 +2,141 @@
 # SPDX-FileCopyrightText: 2025 Ren Okaren
 # SPDX-License-Identifier: BSD-3-Clause
 
+import re
 import sys
 
-# メニュー表
-MENU = {
-    "ビッグマック": 480,
-    "ダブルチーズバーガー": 450,
-    "てりやきマックバーガー": 400,
-    "フィレオフィッシュ": 400,
-    "チキンフィレオ": 420,
-    "てりやきチキンフィレオ": 420,
-    "ベーコンレタスバーガー": 420,
-    "えびフィレオ": 430,
-    "マックチキン": 190,
-    "スパチキ(スパイシーマックチキン)": 220,
-    "チキチー(マックチキンチーズ)": 250,
-    "エグチ(エッグチーズバーガー)": 250,
-    "ハンバーガー": 190,
-    "チーズバーガー": 220,
-    "チキンマックナゲット5ピース": 290,
-    "マックフライポテト": 200,
-    "サイドサラダ": 350,
-    "えだまめコーン": 300,
-    "シャカチキ": 220,
-    "コカ・コーラ": 140,
-    "コカ・コーラゼロ": 140,
-    "スプライト": 140,
-    "ファンタグレープ": 140,
-    "ファンタメロン": 140,
-    "爽健美茶": 140,
-    "Qoo白ぶどう": 140,
-    "アールグレイアイスティー(ストレート)": 140,
-    "アールグレイアイスティー(レモン)": 140,
-    "アールグレイアイスティー(ミルク)": 140,
-    "ホットティー(ストレート)": 140,
-    "ホットティー(レモン)": 140,
-    "ホットティー(ミルク)": 140,
-    "野菜生活100": 190,
-    "ミニッツメイドオレンジ(S)": 240,
-    "ミニッツメイドアップル100": 180,
-    "ミルク": 270,
-    "サントリー黒烏龍茶#濃いめ": 320,
-    "プレミアムローストコーヒー": 120,
-    "プレミアムローストアイスコーヒー": 120,
-    "カフェラテ": 210,
-    "アイスカフェラテ": 210,
-    "キャラメルラテ": 270,
-    "アイスキャラメルラテ": 270,
+
+KCAL_TABLE = {
+    # 主食・麺
+    "白ごはん(茶碗1杯)": 240,
+    "食パン(6枚切り1枚)": 160,
+    "おにぎり": 180,
+    "カレーライス": 850,
+    "牛丼": 700,
+    "親子丼": 700,
+    "カツ丼": 900,
+    "チャーハン": 750,
+    "オムライス": 750,
+    "焼きそば": 650,
+    "ラーメン": 800,
+    "味噌ラーメン": 900,
+    "うどん": 420,
+    "そば": 350,
+    "パスタ": 700,
+    "ペペロンチーノ": 650,
+    "ミートソース": 750,
+
+    # おかず
+    "唐揚げ(5個)": 450,
+    "生姜焼き定食": 900,
+    "とんかつ定食": 1000,
+    "ハンバーグ": 550,
+    "焼肉定食": 1000,
+    "サラダ": 120,
+    "シーザーサラダ": 250,
+    "味噌汁": 40,
+
+    # 軽食・おやつ
+    "サンドイッチ": 350,
+    "プロテインバー": 200,
+    "ヨーグルト": 120,
+    "ポテチ": 330,
+    "チョコレート": 280,
+
+    # 飲み物
+    "カフェラテ": 140,
+    "ブラックコーヒー": 5,
+    "オレンジジュース": 110,
+
+    # 果物
+    "りんご": 95,
+    "バナナ": 105,
 }
 
-# 起動時にメニューを表示する関数（今回は出力をシンプルにしたいので main() からは呼ばない）
-def print_menu_list():
-    print("メニュー一覧")
-    for name, price in MENU.items():
-        print(f"{name} {price}円")
-    print("数量を指定する場合は「2サイドサラダ」や「2 サイドサラダ」のように入力してください")
-    print("入力が終わったら Ctrl+D を押すと合計金額が表示されます")
-    print("")
+# 数値kcalの直接入力
+NUM_KCAL_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:kcal|KCAL)?\s*$")
+
+# 数量
+MULT_TAIL_RE = re.compile(r"^\s*(.+?)\s*[*x×]\s*(\d+)\s*$")
+MULT_HEAD_RE = re.compile(r"^\s*(\d+)\s*[*x×]\s*(.+?)\s*$")
 
 
-def main():
-    total_price = 0
-    has_any_order = False
-
-    # 起動時に一回メニューを表示（課題の趣旨に合わせて今回は使わない）
-    # print_menu_list()
-
-    # 標準入力から1行ずつ注文を読む
-    for order_line in sys.stdin:
-        # 1行の中をカンマで区切って順番に処理する
-        for chunk in order_line.split(","):
-            raw = chunk.strip()
-            if not raw:
-                # 空行や空の要素は無視
-                continue
-
-            # 行頭の連続した数字を個数として読む
-            quantity = 1   # 行に数量の入力がなければ1個
-            name = raw
-            i = 0
-            # raw が一文字ずつ数字かどうか調べる
-            while i < len(raw) and raw[i].isdigit():
-                i += 1
-
-            if i > 0:
-                quantity_str = raw[:i]       # 数量部分の文字列
-                name = raw[i:].strip()       # 商品名部分の文字列
-
-                if not name:
-                    print("商品名を指定してください。", file=sys.stderr)
-                    sys.exit(1)
-                quantity = int(quantity_str)
-                if quantity <= 0:
-                    print("個数は1以上の整数で指定してください。", file=sys.stderr)
-                    sys.exit(1)
-
-            # メニューに存在するかチェック
-            if name not in MENU:
-                print(f"メニューにない商品です: {name}", file=sys.stderr)  # エラー出力にするとテストのとき便利
-                sys.exit(1)
-
-            unit_price = MENU[name]
-            line_total = unit_price * quantity  # 値段×個数
-
-            # 各行の結果を表示（課題では合計だけ出せば良い
-            # print(f"{name} {quantity}個 {line_total}円")
-
-            total_price += line_total
-            has_any_order = True
-
-    # 何か1つでも注文があった場合だけ合計を表示（数値だけを出力）
-    if has_any_order:
-        print(total_price)
+def eprint(msg: str) -> None:
+    print(msg, file=sys.stderr)
 
 
-# このファイルが直接実行された時だけ、main を呼び出す。（import した瞬間 main() が動き出すのを防げる）
+def parse_item_and_multiplier(token: str) -> tuple[str, int]:
+    t = token.strip()
+    if not t:
+        raise ValueError("empty token")
+
+    m = MULT_TAIL_RE.match(t)
+    if m:
+        return m.group(1).strip(), int(m.group(2))
+
+    m = MULT_HEAD_RE.match(t)
+    if m:
+        return m.group(2).strip(), int(m.group(1))
+
+    return t, 1
+
+
+def kcal_of_one(item: str) -> int:
+    m = NUM_KCAL_RE.match(item)
+    if m:
+        v = float(m.group(1))
+        if v < 0:
+            raise ValueError("negative kcal")
+        return int(round(v))
+
+    if item in KCAL_TABLE:
+        return int(KCAL_TABLE[item])
+
+    raise KeyError(item)
+
+
+def main() -> int:
+    if len(sys.argv) >= 2 and sys.argv[1] == "--list":
+        for k, v in sorted(KCAL_TABLE.items()):
+            print(f"{k}\t{v}")
+        return 0
+
+    raw = sys.stdin.read()
+    raw = raw.replace("、", ",").strip()
+    if not raw:
+        eprint("ERROR: empty input")
+        return 1
+
+    lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+    if len(lines) != 1:
+        eprint("ERROR: please provide exactly one non-empty line")
+        return 1
+
+    tokens = [t.strip() for t in lines[0].split(",") if t.strip()]
+    if not tokens:
+        eprint("ERROR: empty input")
+        return 1
+
+    total = 0
+    for tok in tokens:
+        try:
+            item, mult = parse_item_and_multiplier(tok)
+            if mult <= 0:
+                eprint(f"ERROR: invalid multiplier: {tok}")
+                return 1
+            total += kcal_of_one(item) * mult
+        except KeyError:
+            eprint(f"ERROR: unknown item: {tok}")
+            return 1
+        except ValueError:
+            eprint(f"ERROR: invalid kcal: {tok}")
+            return 1
+
+    print(total)
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
+EOF
+
